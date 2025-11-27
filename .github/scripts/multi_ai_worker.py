@@ -13,8 +13,8 @@ PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
 
 # Model definitions
-MODEL_CLAUDE_NAME = "claude-opus-4-20250514"
-REQUESTED_CLAUDE_MODEL = "claude-opus-4-20250514"
+MODEL_CLAUDE_NAME = "claude-opus-4-5@20251101"
+REQUESTED_CLAUDE_MODEL = "claude-opus-4-5@20251101"
 
 # Reverting to gemini-3-pro-preview as explicitly requested for ensuring "PREVIEW" version
 MODEL_GEMINI_NAME = "gemini-3-pro-preview"
@@ -69,9 +69,9 @@ async def call_claude_vertex(model_name, system_prompt, user_content):
                 await asyncio.sleep(sleep_time)
             else:
                 # Fallback to standard Opus ID if custom one fails
-                if model_name != "claude-opus-4-20250514" and ("404" in str(e) or "not found" in str(e).lower()):
+                if model_name != "claude-opus-4-5@20251101" and ("404" in str(e) or "not found" in str(e).lower()):
                     print("⚠️ [Claude] Requested model not found. Falling back to standard Claude Opus 4.5.")
-                    return await call_claude_vertex("claude-opus-4-20250514", system_prompt, user_content)
+                    return await call_claude_vertex("claude-opus-4-5@20251101", system_prompt, user_content)
                 raise e
 
 async def call_gemini_vertex(model_name, system_prompt, user_content):
