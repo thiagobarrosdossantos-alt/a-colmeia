@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 import os
 import json
-import vertexai
 from vertexai.generative_models import GenerativeModel
+import vertexai
 from github import Github
 
-# ==================== CONFIG ====================
-PROJECT_ID = os.getenv('GCP_PROJECT_ID')
-LOCATION = 'us-central1'
-MODEL = 'claude-opus-4-5@20251101'
+# ================== CONFIG ==================
+PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
+LOCATION = "us-central1"
+MODEL = "claude-3-5-sonnet-v2@20241022"
 
-# Inicializar
+# Inicializar Vertex AI
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 claude = GenerativeModel(MODEL)
 
 # GitHub
 g = Github(os.getenv('GITHUB_TOKEN'))
-repo = g.get_repo(os.getenv('GITHUB_REPOSITORY'))
 
-# ==================== FUNÇÕES ====================
+# ================== FUNÇÕES ==================
 
 def ask_claude(prompt: str) -> str:
     """Pergunta para o Claude"""
@@ -27,113 +26,103 @@ def ask_claude(prompt: str) -> str:
 
 def review_pull_request():
     """Revisa Pull Request"""
-    event = json.loads(os.getenv('GITHUB_EVENT_PATH', '{}'))
+    repo_name = os.getenv('GITHUB_REPOSITORY')
+    pr_number = os.getenv('PR_NUMBER')
     
-    if 'pull_request' not in event:
+    if not repo_name or not pr_number:
+        print("⚠️ Variáveis de ambiente ausentes")
         return
     
-    pr_number = event['pull_request']['number']
-    pr = repo.get_pull(pr_number)
+    repo = g.get_repo(repo_name)
+    pr = repo.get_pull(int(pr_number))
     
     # Pegar arquivos modificados
     files = pr.get_files()
     
     review_comments = []
-    
     for file in files:
-        if file.filename.endswith(('.py', '.js', '.ts', '.tsx', '.jsx', '.md')):
-            
+        if file.filename.endswith(('.py', '.js', '.ts', '.tsx', '.jsx')):
             prompt = f"""
-Você é o Arquiteto da A Colmeia - sistema de desenvolvimento autônomo.
+Você é o revisor de código de A Colmeia - Sistema de Agentes de IA.
 
-Revise este código do projeto A Colmeia:
+Analise este arquivo modificado:
+Arquivo: {file.filename}
+Mudanças: +{file.additions} -{file.deletions}
 
-**Arquivo**: {file.filename}
-**Mudanças**:
-{file.patch if file.patch else "Arquivo novo"}
 Forneça análise DIRETA e PRÁTICA:
+- Erros ou bugs críticos
+- Problemas de segurança
+- Melhorias de código
+- Comandos exatos
 
-1. **Qualidade**: Avalie código (0-10)
-2. **Problemas**: Liste bugs/vulnerabilidades
-3. **Otimizações**: Melhorias específicas de performance
-4. **Padrões A Colmeia**: Verificar conformidade com:
-   - TypeScript strict mode
-   - Error handling completo
-   - Validação Zod
-   - Comentários JSDoc
-5. **Ação Recomendada**: APROVAR / SOLICITAR MUDANÇAS / COMENTAR
-
-Seja técnico e direto. Sem enrolação.
+Seja DIRETO.
 """
-            
             analysis = ask_claude(prompt)
-            
-            review_comments.append(f"""
-## 🤖 Claude Opus 4.5 - Análise de {file.filename}
-
-{analysis}
-
----
-*Análise automática via Vertex AI*
-""")
+            review_comments.append(f"**📝 {file.filename}**\n\n{analysis}")
     
     # Postar review
     if review_comments:
-        pr.create_issue_comment('\n\n'.join(review_comments))
-        print(f"✅ Review completo no PR #{pr_number}")
+        comment_body = "\n\n---\n\n".join(review_comments)
+        pr.create_issue_comment(f"""
+🤖 **Revisão Automática via Vertex AI - Claude Opus 4.5**
+
+{comment_body}
+
+---
+
+*Análise automática via A Colmeia - Sistema de Agentes de IA*
+""")
+        print("✅ Revisão postada!")
+    else:
+        print("⚠️ Nenhum arquivo para revisar")
 
 def respond_to_issue():
-    """Responde Issues"""
-    event = json.loads(os.getenv('GITHUB_EVENT_PATH', '{}'))
+    """Responde issue"""
+    repo_name = os.getenv('GITHUB_REPOSITORY')
+    issue_number = os.getenv('ISSUE_NUMBER')
     
-    if 'issue' not in event:
+    if not repo_name or not issue_number:
+        print("⚠️ Variáveis ausentes")
         return
     
-    issue = repo.get_issue(event['issue']['number'])
-    
-    # Só responde se tiver label 'claude' ou 'help'
-    labels = [l.name for l in issue.labels]
-    if not any(l in labels for l in ['claude', 'help', 'question']):
-        return
+    repo = g.get_repo(repo_name)
+    issue = repo.get_issue(int(issue_number))
     
     prompt = f"""
-Você é o Comandante da A Colmeia.
+Issue: {issue.title}
 
-**Issue**: {issue.title}
-**Descrição**:
 {issue.body}
 
-Forneça resposta TÉCNICA e ACIONÁVEL:
-- Solução direta
-- Código exemplo se aplicável
-- Próximos passos concretos
+Você é Claude Worker - Agente Autônomo de A Colmeia.
 
-Seja prático. Foco em resolver.
+Forneça resposta DIRETA e PRÁTICA com comandos exatos se aplicável.
 """
     
     response = ask_claude(prompt)
     
     issue.create_comment(f"""
-## 🐝 Comandante A Colmeia - Claude Opus 4.5
+🤖 **Resposta Automática - Claude Opus 4.5**
 
 {response}
 
 ---
-*Resposta automática via Vertex AI - Para desativar, remova a label 'claude'*
-""")
-    
-    print(f"✅ Respondido issue #{issue.number}")
 
-# ==================== MAIN ====================
+*Resposta automática via A Colmeia*
+""")
+    print("✅ Resposta postada!")
+
+# ================== MAIN ==================
 
 if __name__ == "__main__":
     event_name = os.getenv('GITHUB_EVENT_NAME')
     
-    print(f"🐝 Claude Worker iniciado - Evento: {event_name}")
+    print(f"🚀 Claude Worker iniciado - Evento: {event_name}")
     
     if event_name == 'pull_request':
         review_pull_request()
     elif event_name in ['issues', 'issue_comment']:
         respond_to_issue()
+    else:
+        print(f"⚠️ Evento não suportado: {event_name}")
     
     print("✅ Claude Worker finalizado")
