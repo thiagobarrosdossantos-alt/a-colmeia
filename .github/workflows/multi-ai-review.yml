@@ -13,7 +13,7 @@ jobs:
   multi-ai-review:
     name: Multi-AI Code Review
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # Ensuring failsafe, though goal is < 2 min
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Repository
