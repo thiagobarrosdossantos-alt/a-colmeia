@@ -13,17 +13,14 @@ PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
 
 # Model definitions
-MODEL_CLAUDE_NAME = "claude-3-opus@20240229" # Correct Vertex AI Model ID for Claude 3 Opus
-# Note: User requested "claude-opus-4-20250514", but that looks like a placeholder or unreleased model.
-# I will try to use the requested name first, but use AnthropicVertex which handles Claude on Vertex.
-# If the user specifically said "claude-opus-4-20250514" I will pass that to the client.
+MODEL_CLAUDE_NAME = "claude-opus-4-20250514"
 REQUESTED_CLAUDE_MODEL = "claude-opus-4-20250514"
 
-MODEL_GEMINI_NAME = "gemini-3-pro-preview" # User requested
-MODEL_GEMINI_FALLBACK = "gemini-1.5-pro-001"
+MODEL_GEMINI_NAME = "gemini-exp-1206"
+MODEL_GEMINI_FALLBACK = "gemini-exp-1206"
 
 # Jules Engine
-MODEL_JULES_ENGINE = "gemini-1.5-pro-001" # Reliable engine for DevOps logic
+MODEL_JULES_ENGINE = "gemini-exp-1206"
 
 def get_file_content(repo, file):
     """Fetches the content of a file from the repo."""
@@ -46,7 +43,7 @@ async def call_claude_vertex(model_name, system_prompt, user_content):
         try:
             message = client.messages.create(
                 max_tokens=4096,
-                model=model_name, # Try user model, might need fallback to "claude-3-opus@20240229"
+                model=model_name,
                 system=system_prompt,
                 messages=[
                     {
@@ -63,9 +60,9 @@ async def call_claude_vertex(model_name, system_prompt, user_content):
                 await asyncio.sleep(sleep_time)
             else:
                 # Fallback to standard Opus ID if custom one fails
-                if model_name != "claude-3-opus@20240229" and ("404" in str(e) or "not found" in str(e).lower()):
-                    print("⚠️ [Claude] Requested model not found. Falling back to standard Claude 3 Opus.")
-                    return await call_claude_vertex("claude-3-opus@20240229", system_prompt, user_content)
+                if model_name != "claude-opus-4-20250514" and ("404" in str(e) or "not found" in str(e).lower()):
+                    print("⚠️ [Claude] Requested model not found. Falling back to standard Claude Opus 4.5.")
+                    return await call_claude_vertex("claude-opus-4-20250514", system_prompt, user_content)
                 raise e
 
 async def call_gemini_vertex(model_name, system_prompt, user_content):
