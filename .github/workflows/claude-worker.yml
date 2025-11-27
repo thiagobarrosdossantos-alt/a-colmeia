@@ -4,17 +4,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   issues:
-    types: [opened, labeled]
+    types: [opened]
   issue_comment:
     types: [created]
 
 jobs:
   claude-assistant:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
     
     steps:
       - name: Checkout
@@ -27,7 +23,7 @@ jobs:
       
       - name: Install Dependencies
         run: |
-          pip install google-cloud-aiplatform PyGithub anthropic requests
+          pip install google-cloud-aiplatform PyGithub anthropic requests --break-system-packages
       
       - name: Authenticate GCP
         run: |
@@ -36,8 +32,12 @@ jobs:
       
       - name: Run Claude Worker
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp-key.json
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          python .github/scripts/claude_worker.py
+          python3 .github/scripts/claude_worker.py
