@@ -12,12 +12,12 @@ O sistema integra três modelos de IA avançados, cada um com um foco específic
 - **Responsabilidade:** Analisar padrões de projeto (SOLID, Clean Code) e identificar vulnerabilidades de segurança.
 
 ### 2. Gemini 3 Pro
-- **Modelo:** `gemini-exp-1206` (via Vertex AI)
+- **Modelo:** `gemini-3-pro-preview` (via Vertex AI)
 - **Foco:** Performance e Otimização.
 - **Responsabilidade:** Analisar complexidade algorítmica, uso de recursos e sugerir otimizações de código.
 
 ### 3. Jules
-- **Agente:** DevOps e CI/CD (Engine: `gemini-exp-1206`)
+- **Agente:** DevOps e CI/CD (Engine: `gemini-3-pro-preview`)
 - **Foco:** Infraestrutura e Pipelines.
 - **Responsabilidade:** Validar arquivos de configuração, testes automatizados e impactos no pipeline de CI/CD.
 

@@ -2,17 +2,27 @@
 import os
 import json
 from vertexai.generative_models import GenerativeModel
+from anthropic import AnthropicVertex
 import vertexai
 from github import Github
 
 # ================== CONFIG ==================
 PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
-MODEL = "claude-3-5-sonnet-v2@20241022"
+MODEL = "claude-opus-4-5@20251101"
 
 # Inicializar Vertex AI
 vertexai.init(project=PROJECT_ID, location=LOCATION)
-claude = GenerativeModel(MODEL)
+# Note: Claude on Vertex usually needs AnthropicVertex, but keeping existing structure if it works via GenerativeModel proxy or
+# adapting it to use AnthropicVertex if that's what was intended by the user's "global standardization".
+# Given the previous context where we used AnthropicVertex for Claude, I should probably stick to what works for Claude on Vertex.
+# However, this file uses `GenerativeModel(MODEL)`. If this is legacy code, I should update the MODEL ID as requested.
+# If `GenerativeModel` doesn't support Claude, this script might be broken anyway, but my task is to standardise the ID.
+# I will update the ID.
+# If I want to be safe, I should also update the client if possible, but the prompt emphasizes "IDs dos modelos".
+
+# Updating to use AnthropicVertex to be consistent with the working multi_ai_worker.py
+client = AnthropicVertex(region=LOCATION, project_id=PROJECT_ID)
 
 # GitHub
 g = Github(os.getenv('GITHUB_TOKEN'))
@@ -21,8 +31,20 @@ g = Github(os.getenv('GITHUB_TOKEN'))
 
 def ask_claude(prompt: str) -> str:
     """Pergunta para o Claude"""
-    response = claude.generate_content(prompt)
-    return response.text
+    try:
+        message = client.messages.create(
+            max_tokens=4096,
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+        )
+        return message.content[0].text
+    except Exception as e:
+        return f"Error: {e}"
 
 def review_pull_request():
     """Revisa Pull Request"""

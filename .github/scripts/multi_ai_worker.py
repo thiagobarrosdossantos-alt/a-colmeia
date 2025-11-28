@@ -18,7 +18,7 @@ REQUESTED_CLAUDE_MODEL = "claude-opus-4-5@20251101"
 
 # Reverting to gemini-3-pro-preview as explicitly requested for ensuring "PREVIEW" version
 MODEL_GEMINI_NAME = "gemini-3-pro-preview"
-MODEL_GEMINI_FALLBACK = "gemini-1.5-pro-001"
+MODEL_GEMINI_FALLBACK = "gemini-3-pro-preview"
 
 # Jules Engine
 MODEL_JULES_ENGINE = "gemini-3-pro-preview"
