@@ -1,0 +1,56 @@
+name: Multi-AI Review - A Colmeia
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  multi-ai-review:
+    name: Multi-AI Code Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade google-cloud-aiplatform PyGithub anthropic google-auth --break-system-packages
+          pip freeze > installed_packages.txt
+          cat installed_packages.txt
+
+      - name: Authenticate GCP
+        env:
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        run: |
+          echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+
+      - name: Run Multi-AI Worker
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp-key.json
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -z "$PR_NUMBER" ]; then
+            echo "⚠️ PR_NUMBER is empty. Skipping execution (likely not a PR event)."
+            exit 0
+          fi
+          python3 .github/scripts/multi_ai_worker.py
