@@ -7,17 +7,17 @@ Este repositório utiliza **A Colmeia**, um sistema autônomo de agentes de IA, 
 O sistema integra três modelos de IA avançados, cada um com um foco específico:
 
 ### 1. Claude Opus 4.5
-- **Modelo:** `claude-opus-4-5@20251101` (via Vertex AI)
+- **Modelo:** `claude-opus-4-5-20251101`
 - **Foco:** Arquitetura de Software e Segurança.
 - **Responsabilidade:** Analisar padrões de projeto (SOLID, Clean Code) e identificar vulnerabilidades de segurança.
 
-### 2. Gemini 3 Pro
-- **Modelo:** `gemini-3-pro-preview` (via Vertex AI)
+### 2. Gemini 2.5 Pro
+- **Modelo:** `gemini-2.5-pro` (via Vertex AI)
 - **Foco:** Performance e Otimização.
 - **Responsabilidade:** Analisar complexidade algorítmica, uso de recursos e sugerir otimizações de código.
 
 ### 3. Jules
-- **Agente:** DevOps e CI/CD (Engine: `gemini-3-pro-preview`)
+- **Agente:** DevOps e CI/CD (Engine: `gemini-2.5-pro`)
 - **Foco:** Infraestrutura e Pipelines.
 - **Responsabilidade:** Validar arquivos de configuração, testes automatizados e impactos no pipeline de CI/CD.
 

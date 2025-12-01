@@ -9,20 +9,11 @@ from github import Github
 # ================== CONFIG ==================
 PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
-MODEL = "claude-opus-4-5@20251101"
+MODEL = "claude-3-5-sonnet-v2@20241022"
 
 # Inicializar Vertex AI
 vertexai.init(project=PROJECT_ID, location=LOCATION)
-# Note: Claude on Vertex usually needs AnthropicVertex, but keeping existing structure if it works via GenerativeModel proxy or
-# adapting it to use AnthropicVertex if that's what was intended by the user's "global standardization".
-# Given the previous context where we used AnthropicVertex for Claude, I should probably stick to what works for Claude on Vertex.
-# However, this file uses `GenerativeModel(MODEL)`. If this is legacy code, I should update the MODEL ID as requested.
-# If `GenerativeModel` doesn't support Claude, this script might be broken anyway, but my task is to standardise the ID.
-# I will update the ID.
-# If I want to be safe, I should also update the client if possible, but the prompt emphasizes "IDs dos modelos".
-
-# Updating to use AnthropicVertex to be consistent with the working multi_ai_worker.py
-client = AnthropicVertex(region=LOCATION, project_id=PROJECT_ID)
+claude = GenerativeModel(MODEL)
 
 # GitHub
 g = Github(os.getenv('GITHUB_TOKEN'))

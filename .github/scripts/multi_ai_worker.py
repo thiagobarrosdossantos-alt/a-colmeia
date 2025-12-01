@@ -13,15 +13,15 @@ PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
 
 # Model definitions
-MODEL_CLAUDE_NAME = "claude-opus-4-5@20251101"
-REQUESTED_CLAUDE_MODEL = "claude-opus-4-5@20251101"
+MODEL_CLAUDE_NAME = "claude-opus-4-5-20251101"
+REQUESTED_CLAUDE_MODEL = "claude-opus-4-5-20251101"
 
-# Reverting to gemini-3-pro-preview as explicitly requested for ensuring "PREVIEW" version
-MODEL_GEMINI_NAME = "gemini-3-pro-preview"
-MODEL_GEMINI_FALLBACK = "gemini-3-pro-preview"
+# Updated to gemini-2.5-pro
+MODEL_GEMINI_NAME = "gemini-2.5-pro"
+MODEL_GEMINI_FALLBACK = "gemini-2.5-pro"
 
 # Jules Engine
-MODEL_JULES_ENGINE = "gemini-3-pro-preview"
+MODEL_JULES_ENGINE = "gemini-2.5-pro"
 
 def get_file_content(repo, file):
     """Fetches the content of a file from the repo."""
@@ -69,9 +69,9 @@ async def call_claude_vertex(model_name, system_prompt, user_content):
                 await asyncio.sleep(sleep_time)
             else:
                 # Fallback to standard Opus ID if custom one fails
-                if model_name != "claude-opus-4-5@20251101" and ("404" in str(e) or "not found" in str(e).lower()):
+                if model_name != "claude-opus-4-5-20251101" and ("404" in str(e) or "not found" in str(e).lower()):
                     print("⚠️ [Claude] Requested model not found. Falling back to standard Claude Opus 4.5.")
-                    return await call_claude_vertex("claude-opus-4-5@20251101", system_prompt, user_content)
+                    return await call_claude_vertex("claude-opus-4-5-20251101", system_prompt, user_content)
                 raise e
 
 async def call_gemini_vertex(model_name, system_prompt, user_content):
@@ -243,7 +243,7 @@ async def main():
     """
 
     prompt_gemini = """
-    Você é Gemini 3 Pro, especialista Sênior em Performance e Engenharia de Software.
+    Você é Gemini 2.5 Pro, especialista Sênior em Performance e Engenharia de Software.
     Realize uma ANÁLISE PROFUNDA, DETALHADA e COMPLETA.
     Busque cada milissegundo de latência e cada byte de memória desperdiçado.
 
@@ -273,14 +273,14 @@ async def main():
 
     results = await asyncio.gather(
         analyze_with_model("Claude Opus 4.5", REQUESTED_CLAUDE_MODEL, prompt_claude, code_context),
-        analyze_with_model("Gemini 3 Pro", MODEL_GEMINI_NAME, prompt_gemini, code_context),
+        analyze_with_model("Gemini 2.5 Pro", MODEL_GEMINI_NAME, prompt_gemini, code_context),
         analyze_with_model("Jules", MODEL_JULES_ENGINE, prompt_jules, code_context)
     )
 
     # 5. Post Comments
     print("Posting comments to PR...")
 
-    agents = ["Claude Opus 4.5", "Gemini 3 Pro", "Jules"]
+    agents = ["Claude Opus 4.5", "Gemini 2.5 Pro", "Jules"]
     for i, analysis in enumerate(results):
         if analysis and "Error executing analysis" not in analysis:
             try:
