@@ -9,11 +9,13 @@ from github import Github
 # ================== CONFIG ==================
 PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
-MODEL = "claude-3-5-sonnet-v2@20241022"
+MODEL = "claude-opus-4-5-20251101"
 
 # Inicializar Vertex AI
 vertexai.init(project=PROJECT_ID, location=LOCATION)
-claude = GenerativeModel(MODEL)
+
+# Updating to use AnthropicVertex to be consistent with the working multi_ai_worker.py
+client = AnthropicVertex(region=LOCATION, project_id=PROJECT_ID)
 
 # GitHub
 g = Github(os.getenv('GITHUB_TOKEN'))
