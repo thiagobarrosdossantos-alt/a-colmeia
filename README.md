@@ -7,7 +7,7 @@ Este repositório utiliza **A Colmeia**, um sistema autônomo de agentes de IA, 
 O sistema integra três modelos de IA avançados, cada um com um foco específico:
 
 ### 1. Claude Opus 4.5
-- **Modelo:** `claude-opus-4-5-20251101` (via Vertex AI)
+- **Modelo:** `claude-opus-4-5-20251101`
 - **Foco:** Arquitetura de Software e Segurança.
 - **Responsabilidade:** Analisar padrões de projeto (SOLID, Clean Code) e identificar vulnerabilidades de segurança.
 
