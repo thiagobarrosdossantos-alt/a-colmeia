@@ -2,17 +2,20 @@
 import os
 import json
 from vertexai.generative_models import GenerativeModel
+from anthropic import AnthropicVertex
 import vertexai
 from github import Github
 
 # ================== CONFIG ==================
 PROJECT_ID = os.getenv('GCP_PROJECT_ID', 'gen-lang-client-0394737170')
 LOCATION = "us-central1"
-MODEL = "claude-3-5-sonnet-v2@20241022"
+MODEL = "claude-opus-4-5-20251101"
 
 # Inicializar Vertex AI
 vertexai.init(project=PROJECT_ID, location=LOCATION)
-claude = GenerativeModel(MODEL)
+
+# Updating to use AnthropicVertex to be consistent with the working multi_ai_worker.py
+client = AnthropicVertex(region=LOCATION, project_id=PROJECT_ID)
 
 # GitHub
 g = Github(os.getenv('GITHUB_TOKEN'))
@@ -21,8 +24,20 @@ g = Github(os.getenv('GITHUB_TOKEN'))
 
 def ask_claude(prompt: str) -> str:
     """Pergunta para o Claude"""
-    response = claude.generate_content(prompt)
-    return response.text
+    try:
+        message = client.messages.create(
+            max_tokens=4096,
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+        )
+        return message.content[0].text
+    except Exception as e:
+        return f"Error: {e}"
 
 def review_pull_request():
     """Revisa Pull Request"""
